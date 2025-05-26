@@ -8,7 +8,7 @@ A simple yet interactive **Quiz Application** built using **HTML, CSS, and JavaS
 
 ## 🚀 Live Demo
 
-> You can host it using GitHub Pages, Netlify, or localhost to try it out.
+> We can host it using GitHub Pages, Netlify, or localhost to try it out.
 
 ---
 
