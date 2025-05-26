@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  //! Grab the elements/references
   const startBtn = document.getElementById("start-btn");
   const nextBtn = document.getElementById("next-btn");
   const restartBtn = document.getElementById("restart-btn");
@@ -15,11 +14,13 @@ document.addEventListener("DOMContentLoaded", () => {
       question: "What is the capital of France?",
       choices: ["Paris", "London", "Berlin", "Madrid"],
       answer: "Paris",
+      marks: 2,
     },
     {
       question: "Which planet is known as the Red Planet?",
       choices: ["Mars", "Venus", "Jupiter", "Saturn"],
       answer: "Mars",
+      marks: 2,
     },
     {
       question: "Who wrote 'Hamlet'?",
@@ -30,69 +31,70 @@ document.addEventListener("DOMContentLoaded", () => {
         "Mark Twain",
       ],
       answer: "William Shakespeare",
+      marks: 3,
     },
   ];
 
   let currentQuestionIdx = 0;
   let score = 0;
-  let answerFlag;
+  let timeoutId;
 
-  //! Someone clicks on the START button, then..
   startBtn.addEventListener("click", startQuiz);
-
-  //! Someone clicks on the NEXT button, then..
   nextBtn.addEventListener("click", showNextQuestion);
-
-  //! Someone clicks on the RESTART button, then..
   restartBtn.addEventListener("click", () => {
     currentQuestionIdx = 0;
     score = 0;
+    clearTimeout(timeoutId);
     resultContainer.classList.add("hidden");
     startQuiz();
   });
 
-  let interval = setInterval(showNextQuestion, 5000);
-
-  //! The functions
   function startQuiz() {
-    startBtn.classList.add("hidden"); //hiding on commencement of the quiz
-    resultContainer.classList.add("hidden"); //hiding on commencement of the quiz
-    questionContainer.classList.remove("hidden"); //showing on commencement of the quiz
+    startBtn.classList.add("hidden");
+    resultContainer.classList.add("hidden");
+    questionContainer.classList.remove("hidden");
     stopWatch.classList.remove("hidden");
     showQuestion();
-    interval();
   }
 
   function showQuestion() {
+    clearTimeout(timeoutId);
     nextBtn.classList.add("hidden");
-    questionTxt.textContent = questions[currentQuestionIdx].question; //dynamically
-    //! Now, show the options too!
-    choicesList.innerHTML = ""; //refresh/clear previous questions
-    // 💡 LIST===ARRAY , ARRAY===LIST
-    // forEach/map/... (whatevs)
+    questionTxt.textContent = questions[currentQuestionIdx].question;
+    choicesList.innerHTML = "";
+
     questions[currentQuestionIdx].choices.forEach((choice) => {
       const li = document.createElement("li");
       li.textContent = choice;
-      if (answerFlag === "correct") {
-        li.classList.add("correct-answer");
-      }
-      // 💡 selectAnswer() - executes immediately ❌, selectAnswer - can't provide params ❌, Solution? - ()=> fx(param) ✅
-      //li.addEventListener("click", () => selectAnswer(choice));
-      li.addEventListener("click", () => selectAnswer(choice));
-
-      console.log(score);
-
-      // Don't forget to attach/append
+      li.addEventListener("click", () => {
+        clearTimeout(timeoutId);
+        selectAnswer(choice);
+      });
       choicesList.appendChild(li);
     });
+
+    timeoutId = setTimeout(() => {
+      showNextQuestion();
+    }, 5000);
   }
 
   function selectAnswer(choice) {
     const correctAnswer = questions[currentQuestionIdx].answer;
+    const allChoices = choicesList.querySelectorAll("li");
+
+    allChoices.forEach((li) => {
+      li.style.pointerEvents = "none"; // disable after first click
+      if (li.textContent === correctAnswer) {
+        li.classList.add("correct-answer");
+      } else if (li.textContent === choice) {
+        li.classList.add("wrong-answer");
+      }
+    });
+
     if (choice === correctAnswer) {
-      score++;
-      //answerFlag === "correct";
+      score += questions[currentQuestionIdx].marks;
     }
+
     nextBtn.classList.remove("hidden");
   }
 
@@ -100,10 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
     questionContainer.classList.add("hidden");
     stopWatch.classList.add("hidden");
     resultContainer.classList.remove("hidden");
-    clearInterval(interval);
-    scoreDisplay.textContent = `
-    ${score} out of ${questions.length}
-    `;
+    clearTimeout(timeoutId);
+
+    const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
+    scoreDisplay.textContent = `You scored ${score} out of ${totalMarks} marks`;
   }
 
   function showNextQuestion() {

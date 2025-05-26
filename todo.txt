@@ -1,3 +1,4 @@
 1. change bg-color of choice upon selection.
 2. use setTimeOut or something to move to the next-question automatically.
 3. provide MARKS for each question.. And calculate, display.
+4. Fix the bugs
